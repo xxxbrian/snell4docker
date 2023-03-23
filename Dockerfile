@@ -3,12 +3,14 @@ FROM debian:stable-slim
 # Initial setup
 RUN apt-get update && \
     apt-get install -y wget unzip && \
-    mkdir /snell
+    mkdir /etc/snell-server \
+    mkdir snell
 WORKDIR /snell
-ADD VERSION /snell/VERSION
+ADD VERSION /etc/snell-server/VERSION
+ADD start.sh /etc/snell-server/start.sh
+RUN chmod +x /etc/snell-server/start.sh
 
 # Set variables
-RUN VERSION=$(cat /snell/VERSION)
 RUN if dpkg --print-architecture | grep -q "amd64"; then \
         ARCH="amd64"; \
     elif dpkg --print-architecture | grep -q "i386"; then \
@@ -21,14 +23,11 @@ RUN if dpkg --print-architecture | grep -q "amd64"; then \
         echo "Unsupported architecture"; \
         exit 1; \
     fi && \
-    echo $ARCH > /snell/ARCH
+    echo $ARCH > /etc/snell-server/ARCH
 
 # Download snell
-RUN wget -O snell-server.zip https://dl.nssurge.com/snell/snell-server-$(cat /snell/VERSION)-linux-$(cat /snell/ARCH).zip && \
-    unzip ./snell-server.zip -d .
-
-# Config snell
-RUN yes | ./snell-server
+RUN wget -O /etc/snell-server/snell-server.zip https://dl.nssurge.com/snell/snell-server-$(cat /etc/snell-server/VERSION)-linux-$(cat /etc/snell-server/ARCH).zip && \
+    unzip /etc/snell-server/snell-server.zip -d /etc/snell-server
 
 # Clean up
 RUN apt-get remove -y wget unzip && \
@@ -37,4 +36,4 @@ RUN apt-get remove -y wget unzip && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Start
-CMD ["/snell/snell-server", "-c", "/snell/snell-server.conf"]
+ENTRYPOINT ["/etc/snell-server/start.sh"]
