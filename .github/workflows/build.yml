@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          # platforms: linux/arm64, linux/amd64, linux/386, linux/arm/v7
-          platforms: linux/amd64, linux/386, linux/arm/v7
+          platforms: linux/arm64, linux/amd64, linux/386, linux/arm/v7
+          # platforms: linux/amd64, linux/386, linux/arm/v7
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/snell-server:latest
